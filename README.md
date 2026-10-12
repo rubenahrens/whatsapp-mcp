@@ -1,3 +1,11 @@
+> **Read-only fork.** In deze fork is alle verzendfunctionaliteit verwijderd:
+> - bridge: het `/api/send`-endpoint, `sendWhatsAppMessage` en de ongebruikte history-sync- en audio-helpers zijn weg; er zit geen `client.SendMessage` meer in de code
+> - de REST API luistert alleen op `127.0.0.1` (was: alle netwerkinterfaces)
+> - MCP-server: de tools `send_message`, `send_file` en `send_audio_message` (en `audio.py`) zijn verwijderd
+> - de MCP-server opent `messages.db` alleen-lezen (`mode=ro`)
+>
+> Overgebleven tools: zoeken en lezen van contacten, chats en berichten, plus `download_media` (downloadt bijlagen naar je eigen schijf).
+
 # WhatsApp MCP Server
 
 This is a Model Context Protocol (MCP) server for WhatsApp.
