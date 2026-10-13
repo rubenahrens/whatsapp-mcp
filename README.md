@@ -114,6 +114,28 @@ Without this setup, you'll likely run into errors like:
 
 > `Binary was compiled with 'CGO_ENABLED=0', go-sqlite3 requires cgo to work.`
 
+### Running the bridge in the background (macOS launchd)
+
+Instead of keeping `./whatsapp-bridge` open in a terminal, run it as a launchd user agent. The agent starts at login and restarts after a crash. It expects a plist at `~/Library/LaunchAgents/nl.rubenahrens.whatsapp-bridge.plist` that points at the built binary and sets `WorkingDirectory` to the `whatsapp-bridge` folder (so `store/` is found).
+
+```bash
+# start (load the agent)
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/nl.rubenahrens.whatsapp-bridge.plist
+
+# stop (unload the agent)
+launchctl bootout gui/$(id -u)/nl.rubenahrens.whatsapp-bridge
+
+# restart (e.g. after rebuilding the binary)
+launchctl kickstart -k gui/$(id -u)/nl.rubenahrens.whatsapp-bridge
+
+# status
+launchctl print gui/$(id -u)/nl.rubenahrens.whatsapp-bridge
+```
+
+Logs: `~/Library/Logs/whatsapp-bridge.log` and `~/Library/Logs/whatsapp-bridge.err.log`. The bridge logs message content, so treat these files as sensitive.
+
+Never run the agent and a manual `./whatsapp-bridge` at the same time. To re-pair (QR code), stop the agent first.
+
 ## Architecture Overview
 
 This application consists of two main components:
