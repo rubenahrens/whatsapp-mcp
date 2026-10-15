@@ -541,23 +541,27 @@ def get_chat(chat_jid: str, include_last_message: bool = True) -> Optional[Chat]
         conn = sqlite3.connect(f"file:{MESSAGES_DB_PATH}?mode=ro", uri=True)
         cursor = conn.cursor()
         
-        query = """
-            SELECT 
+        # The messages columns only exist when the JOIN below is added.
+        last_message_columns = (
+            "m.content as last_message, m.sender as last_sender, m.is_from_me as last_is_from_me"
+            if include_last_message
+            else "NULL as last_message, NULL as last_sender, NULL as last_is_from_me"
+        )
+        query = f"""
+            SELECT
                 c.jid,
                 c.name,
                 c.last_message_time,
-                m.content as last_message,
-                m.sender as last_sender,
-                m.is_from_me as last_is_from_me
+                {last_message_columns}
             FROM chats c
         """
-        
+
         if include_last_message:
             query += """
-                LEFT JOIN messages m ON c.jid = m.chat_jid 
+                LEFT JOIN messages m ON c.jid = m.chat_jid
                 AND c.last_message_time = m.timestamp
             """
-            
+
         query += " WHERE c.jid = ?"
         
         cursor.execute(query, (chat_jid,))
